@@ -2,6 +2,7 @@ import type { CanvasComponent } from '../types/types';
 
 export const Text: CanvasComponent = ({ ctx, node, parent, offsetX = 0, offsetY = 0 }) => {
   const text = node.value ?? '';
+  console.log(node.attributes);
   const font = node.attributes?.font ?? '20px sans-serif';
   const color = node.attributes?.color ?? '#222';
   const opacity = node.attributes?.opacity ? Number(node.attributes.opacity) : undefined;
@@ -11,7 +12,7 @@ export const Text: CanvasComponent = ({ ctx, node, parent, offsetX = 0, offsetY 
 
   const horizontalAlign = node.attributes?.horizontalAlign;
   const verticalAlign = node.attributes?.verticalAlign;
-
+  console.log(font);
   ctx.save();
   ctx.font = font;
   ctx.fillStyle = color;

@@ -23,6 +23,12 @@ Canvasium is a lightweight renderer that turns **HTML-like markup** into **Node.
 
 ---
 
+## ⚠️ Do NOT Use v1.0.0
+
+I've made some mistakes about exports and esm on first version. It will throw errors when you try to use it.
+
+---
+
 ## ⚙️ Installation
 
 ```bash
@@ -88,7 +94,8 @@ await render(markup, { username: 'Alex' });
 
 ## 📚 Documentation
 
-Full docs: Coming soon!  
+Full docs: [Click Here!](https://h1dr4x0.github.io/canvasium-docs/)
+
 Demo templates, example cards, and integration guides included.
 
 ---

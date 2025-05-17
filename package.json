@@ -1,6 +1,6 @@
 {
   "name": "canvasium",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Markup-based canvas rendering engine for Node.js",
   "type": "module",
   "main": "./dist/index.js",
@@ -16,7 +16,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "rollup -c",
     "lint": "eslint src --ext .ts",
     "format": "prettier --write .",
     "prepare": "npm run build",
@@ -34,11 +34,13 @@
   "license": "MIT",
   "devDependencies": {
     "@eslint/js": "^9.26.0",
+    "@rollup/plugin-typescript": "^12.1.2",
     "eslint": "^9.26.0",
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-prettier": "^5.4.0",
     "globals": "^16.1.0",
     "prettier": "^3.5.3",
+    "rollup": "^4.40.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.32.1"

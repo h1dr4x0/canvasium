@@ -17,20 +17,21 @@ export function tokenize(input: string): Token[] {
         i = end + 1;
       } else {
         const end = input.indexOf('>', i);
-        const tagContent = input.slice(i + 1, end);
-        const [tag, ...attrParts] = tagContent.trim().split(' ');
-        tokens.push({ type: 'tagOpen', value: tag });
+        const tagContent = input.slice(i + 1, end).trim();
 
-        attrParts.forEach((part) => {
-          const match = part.match(/^(\w+)="([^"]*)"$/);
-          if (match) {
-            tokens.push({
-              type: 'attribute',
-              name: match[1],
-              value: match[2],
-            });
-          }
-        });
+        const tagMatch = tagContent.match(/^([^\s/>]+)/);
+        if (tagMatch) {
+          tokens.push({ type: 'tagOpen', value: tagMatch[1] });
+        }
+        const attrRegex = /([\w:-]+)\s*=\s*"([^"]*)"/g;
+        let match;
+        while ((match = attrRegex.exec(tagContent))) {
+          tokens.push({
+            type: 'attribute',
+            name: match[1],
+            value: match[2],
+          });
+        }
 
         i = end + 1;
       }
