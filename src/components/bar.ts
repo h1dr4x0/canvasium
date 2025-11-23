@@ -9,8 +9,8 @@ export const Bar: CanvasComponent = ({ ctx, node, offsetX = 0, offsetY = 0 }) =>
   const value = Number(node.attributes?.value ?? 0);
   const max = Number(node.attributes?.max ?? 100);
 
-  const outerRadius = Number(node.attributes?.outerRadius ?? 0);
-  const innerRadius = Number(node.attributes?.innerRadius ?? 0);
+  const outerRadii = getRadii(node, 'outerRadius');
+  const innerRadii = getRadii(node, 'innerRadius');
 
   const progressColor = node.attributes?.color ?? '#00baff';
   const backgroundColor = node.attributes?.background ?? '#333';
@@ -18,7 +18,7 @@ export const Bar: CanvasComponent = ({ ctx, node, offsetX = 0, offsetY = 0 }) =>
   const safeWidthEnabled = node.attributes?.safeWidth === 'true';
   const minDrawWidth = Number(node.attributes?.minDrawWidth ?? 4);
 
-  const percent = Math.max(0, Math.min(value / max, 1)); // Clamp 0–1
+  const percent = Math.max(0, Math.min(value / max, 1));
   const filledWidthRaw = percent * width;
 
   const filledWidth = safeWidthEnabled ? Math.max(filledWidthRaw, minDrawWidth) : filledWidthRaw;
@@ -26,15 +26,15 @@ export const Bar: CanvasComponent = ({ ctx, node, offsetX = 0, offsetY = 0 }) =>
   ctx.save();
 
   ctx.beginPath();
-  roundedRect(ctx, x, y, width, height, outerRadius);
+  roundedRectPerCorner(ctx, x, y, width, height, clampRadii(outerRadii, width, height));
   ctx.fillStyle = backgroundColor;
   ctx.fill();
   ctx.closePath();
 
   if (filledWidthRaw > 0) {
     ctx.beginPath();
-    const effectiveRadius = Math.min(innerRadius, filledWidth / 2, height / 2);
-    roundedRect(ctx, x, y, filledWidth, height, effectiveRadius);
+    const radii = clampRadii(innerRadii, filledWidth, height);
+    roundedRectPerCorner(ctx, x, y, filledWidth, height, radii);
     ctx.fillStyle = progressColor;
     ctx.fill();
     ctx.closePath();
@@ -43,22 +43,43 @@ export const Bar: CanvasComponent = ({ ctx, node, offsetX = 0, offsetY = 0 }) =>
   ctx.restore();
 };
 
-function roundedRect(
+type Radii = { tl: number; tr: number; br: number; bl: number };
+
+function getRadii(node: any, base: string): Radii {
+  const baseVal = Number(node.attributes?.[base] ?? 0);
+  const tl = Number(node.attributes?.[`${base}TopLeft`] ?? baseVal);
+  const tr = Number(node.attributes?.[`${base}TopRight`] ?? baseVal);
+  const br = Number(node.attributes?.[`${base}BottomRight`] ?? baseVal);
+  const bl = Number(node.attributes?.[`${base}BottomLeft`] ?? baseVal);
+  return { tl, tr, br, bl };
+}
+
+function clampRadii(radii: Radii, width: number, height: number): Radii {
+  const clamp = (r: number) => Math.min(r, width / 2, height / 2);
+  return {
+    tl: clamp(radii.tl),
+    tr: clamp(radii.tr),
+    br: clamp(radii.br),
+    bl: clamp(radii.bl),
+  };
+}
+
+function roundedRectPerCorner(
   ctx: CanvasRenderingContext2D,
   x: number,
   y: number,
   width: number,
   height: number,
-  radius: number,
+  radii: Radii,
 ) {
-  const r = Math.min(radius, width / 2, height / 2);
-  ctx.moveTo(x + r, y);
-  ctx.lineTo(x + width - r, y);
-  ctx.quadraticCurveTo(x + width, y, x + width, y + r);
-  ctx.lineTo(x + width, y + height - r);
-  ctx.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
-  ctx.lineTo(x + r, y + height);
-  ctx.quadraticCurveTo(x, y + height, x, y + height - r);
-  ctx.lineTo(x, y + r);
-  ctx.quadraticCurveTo(x, y, x + r, y);
+  const { tl, tr, br, bl } = radii;
+  ctx.moveTo(x + tl, y);
+  ctx.lineTo(x + width - tr, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + tr);
+  ctx.lineTo(x + width, y + height - br);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - br, y + height);
+  ctx.lineTo(x + bl, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - bl);
+  ctx.lineTo(x, y + tl);
+  ctx.quadraticCurveTo(x, y, x + tl, y);
 }

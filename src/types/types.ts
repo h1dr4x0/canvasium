@@ -5,6 +5,10 @@ export type Node = {
   attributes?: Record<string, string>;
   children?: Node[];
   value?: string;
+  position?: {
+    line: number;
+    column: number;
+  };
 };
 
 export type RenderContext = {
@@ -14,7 +18,7 @@ export type RenderContext = {
   offsetX?: number;
   offsetY?: number;
   parent?: Node;
-  render: (node: Node, opts?: { offsetX?: number; offsetY?: number }) => void;
+  render: (node: Node, opts?: { offsetX?: number; offsetY?: number }) => Promise<void>;
 };
 
 export type CanvasComponent = (context: RenderContext) => void | Promise<void>;

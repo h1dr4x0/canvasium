@@ -1,7 +1,14 @@
-import type { CanvasComponent } from '../types/types';
+import type { CanvasComponent, Node } from '../types/types';
 import type { CanvasRenderingContext2D } from 'canvas';
 
-export const Card: CanvasComponent = ({ ctx, node, render, offsetX = 0, offsetY = 0, parent }) => {
+export const Card: CanvasComponent = async ({
+  ctx,
+  node,
+  render,
+  offsetX = 0,
+  offsetY = 0,
+  parent,
+}) => {
   const width = Number(node.attributes?.width ?? 300);
   const height = Number(node.attributes?.height ?? 200);
 
@@ -48,7 +55,13 @@ export const Card: CanvasComponent = ({ ctx, node, render, offsetX = 0, offsetY 
     ctx.stroke();
   }
   ctx.restore();
-  node.children?.forEach((child) => render(child, { offsetX: finalX, offsetY: finalY }));
+
+  if (node.children && node.children.length) {
+    const orderedChildren = sortByZIndex(node.children);
+    for (const child of orderedChildren) {
+      await render(child, { offsetX: finalX, offsetY: finalY });
+    }
+  }
 };
 
 function drawRoundedRectPerCorner(
@@ -75,4 +88,22 @@ function drawRoundedRectPerCorner(
   ctx.lineTo(x, y + tl);
   ctx.quadraticCurveTo(x, y, x + tl, y);
   ctx.closePath();
+}
+
+function getZIndex(node: Node) {
+  const raw = node.attributes?.zIndex ?? (node.attributes as any)?.['z-index'];
+  const parsed = Number(raw);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function sortByZIndex(children: Node[]) {
+  return children
+    .map((child, index) => ({ child, index }))
+    .sort((a, b) => {
+      const zA = getZIndex(a.child);
+      const zB = getZIndex(b.child);
+      if (zA === zB) return b.index - a.index;
+      return zA - zB;
+    })
+    .map(({ child }) => child);
 }
